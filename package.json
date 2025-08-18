@@ -4,7 +4,6 @@
   "main": "app.js",
   "scripts": {
     "build": "echo No build for simple application",
-    "start": "node app.js",
     "test": "jest"
   },
   "dependencies": {
