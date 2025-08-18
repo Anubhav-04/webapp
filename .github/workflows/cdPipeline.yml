@@ -13,10 +13,10 @@ jobs:
     environment: staging
 
     steps:
-      - name: "Installing node"
+      - name: "Setup node"
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+            node-version: "24.*"
 
       - name: "Setup vercel cli"
         run: npm install -g vercel
