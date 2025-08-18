@@ -23,7 +23,7 @@ jobs:
                     npm run test  
 
             - name: "Start application"
-              run: npm run start
+              run: npm run start & sleep 5
 
             - name: "Upload artifact"
               uses: actions/upload-artifact@v4
