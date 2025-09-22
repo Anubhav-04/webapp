@@ -38,16 +38,22 @@ pipeline{
             steps {
                 sh '''
                     npm run build
+                    ls -la
                 '''
             }   
         }
-        stage('Deploy') {
+        stage('Install Vercel CLI') {
             steps {
-                sh '''
-                    npm install -g vercel
-                    vercel --prod --token=$NODE_TOKEN --confirm --name=webapp
-                '''
-            }   
+                // Install Vercel CLI if it's not already available
+                sh 'npm install -g vercel'
+            }
+        }
+        stage('Deploy to Vercel') {
+            steps {
+                dir('dist') {
+                    sh 'vercel --prod --token=$NODE_TOKEN --confirm --name=webapp'
+                }
+            }
         }
     }
 }
