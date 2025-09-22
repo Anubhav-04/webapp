@@ -1,5 +1,8 @@
 pipeline{
     agent any
+    environment {
+        NODE_TOKEN = credentials('NODE_TOKEN')
+    }
     tools {
         nodejs "NodeJS"   // Use the NodeJS version configured in Jenkins
     }
@@ -35,6 +38,14 @@ pipeline{
             steps {
                 sh '''
                     npm run build
+                '''
+            }   
+        }
+        stage('Deploy') {
+            steps {
+                sh '''
+                    npm install -g vercel
+                    vercel --prod --token=$NODE_TOKEN --confirm --name=webapp
                 '''
             }   
         }
