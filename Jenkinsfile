@@ -24,7 +24,9 @@ pipeline{
         }
         stage('Approval') {
             steps {
-                input 'Do you want to approve?'
+                timeout(time: 2, unit: 'MIN') {
+                        'Approve/not approve?'
+                }
             }
         }
         stage('Install Dependencies') {
