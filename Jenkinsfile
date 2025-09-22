@@ -22,6 +22,11 @@ pipeline{
                 checkout scm
             }
         }
+        stage('Approval') {
+            steps {
+                input 'Do you want to approve?'
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
