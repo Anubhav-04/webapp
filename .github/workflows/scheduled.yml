@@ -3,6 +3,10 @@ name: "Scheduled Pipeline"
 on:
     schedule:
       - cron: "*/2 * * * *"
+    workflow_dispatch: 
+    push:
+        branches:
+            - main
 
 jobs:
     on-push:
