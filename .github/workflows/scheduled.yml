@@ -1,31 +1,16 @@
-name: "Scheduled Pipeline"
+name: Schedule-Test
 
 on:
-    schedule:
-      - cron: "*/2 * * * *"
-    workflow_dispatch: 
-    push:
-        branches:
-            - main
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
-    on-push:
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Setup node"
-              uses: actions/setup-node@v4
-              with:
-                node-version: "24.*"
+   show-time:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Show Current UTC Time
+         run: date -u
 
-            - name: "Code checkout"
-              uses: actions/checkout@v4
-            
-            - name: "install dependencies"
-              run: npm install
-
-            - name: "Run test"
-              run: npm run test
-
-            - name: "Bild the app"
-              run: npm run build
-              
+       - name: Show Current Local time (IST)
+         run: date -d '+5 hours 30 minutes'
