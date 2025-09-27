@@ -1,0 +1,33 @@
+name: "CI Pipeline for build and test"
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    on-push:
+        runs-on: ubuntu-latest
+        steps:
+            - name: "Setup node"
+              uses: actions/setup-node@v4
+              with:
+                node-version: "24.*"
+
+            - name: "Code checkout"
+              uses: actions/checkout@v4
+            
+            - name: "install dependencies"
+              run: npm install
+
+            - name: "Run test"
+              run: npm run test
+
+            - name: "Bild the app"
+              run: npm run build
+              
+            - name: "Upload artifact"
+              uses: actions/upload-artifact@v4
+              with:
+                    name: build
+                    path: dist
