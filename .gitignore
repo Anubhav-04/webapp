@@ -1,3 +1,4 @@
 /node_modules/
 cdPipeline.yml
 scheduled.yml
+.env
