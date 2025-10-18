@@ -5,6 +5,8 @@ pipeline {
     // Store a Vercel token as a Secret Text credential in Jenkins with ID 'VERCEL_TOKEN'
     VERCEL_TOKEN = credentials('VERCEL_TOKEN')
     // Optional: project/env vars already configured in Vercel Project settings
+    VERCEL_TEAM   = credentials('VERCEL_TEAM_SLUG')    
+    VERCEL_PROJECT= 'webapp'
   }
 
   tools {
@@ -66,15 +68,14 @@ pipeline {
           // Captures deployment URL for later promotion
           sh '''
             set -e
-            DEPLOY_OUTPUT=$(vercel --prod --skip-domain --token="$VERCEL_TOKEN" --confirm --name=webapp)
+            DEPLOY_OUTPUT=$(vercel --prod --skip-domain --token="$VERCEL_TOKEN" --scope="$VERCEL_TEAM" --project="$VERCEL_PROJECT" --confirm --name=webapp)
             echo "$DEPLOY_OUTPUT"
-            # Extract the deployment URL (last URL in output)
             DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[a-zA-Z0-9.-]+\\.vercel\\.app' | tail -n1)
-            if [ -z "$DEPLOY_URL" ]; then
-              echo "Failed to capture deployment URL"; exit 1
+            if [ -z "$DEPLOY_URL" ]; then 
+            echo "Failed to capture deployment URL"; 
+            exit 1; 
             fi
             echo "$DEPLOY_URL" > ../GREEN_DEPLOY_URL.txt
-            echo "Staged (green) deployment: $DEPLOY_URL"
           '''
         }
       }
@@ -86,12 +87,8 @@ pipeline {
           def greenUrl = sh(script: "cat GREEN_DEPLOY_URL.txt", returnStdout: true).trim()
           sh """
             set -e
-            echo "Smoke testing ${greenUrl}"
-            # Adjust the health path as appropriate for your app
-            curl -fsS ${greenUrl} || (echo "Root check failed"; exit 1)
-            # If you expose a /health endpoint, enable this:
-            # curl -fsS ${greenUrl}/health || (echo "Health check failed"; exit 1)
-          """
+            vercel promote "${greenUrl}" --token="$VERCEL_TOKEN" --scope="$VERCEL_TEAM" --project="$VERCEL_PROJECT" --yes
+            """
         }
       }
     }
@@ -126,18 +123,11 @@ pipeline {
 
   post {
     failure {
-      // Automatic rollback: returns production domains to previous deployment
-      // If promote succeeded and a later stage failed, consider whether rollback is desired.
-      // This block triggers when any stage fails before completion.
-      script {
-        echo "Deployment failed — attempting Vercel rollback"
-        sh '''
-          set -e
-          # This rolls back to the previous production deployment for your project
-          vercel rollback --token="$VERCEL_TOKEN" --yes || true
-        '''
-      }
-    }
+    sh '''
+      set -e
+      vercel rollback --token="$VERCEL_TOKEN" --scope="$VERCEL_TEAM" --project="$VERCEL_PROJECT" --yes || true
+    '''
+  }
     success {
       echo 'Blue-Green deployment completed successfully'
     }
