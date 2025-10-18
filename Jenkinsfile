@@ -123,11 +123,18 @@ pipeline {
 
   post {
     failure {
-    sh '''
-      set -e
-      vercel rollback --token="$VERCEL_TOKEN" --scope="$VERCEL_TEAM" --project="$VERCEL_PROJECT" --yes || true
-    '''
-  }
+      // Automatic rollback: returns production domains to previous deployment
+      // If promote succeeded and a later stage failed, consider whether rollback is desired.
+      // This block triggers when any stage fails before completion.
+      script {
+        echo "Deployment failed — attempting Vercel rollback"
+        sh '''
+          set -e
+          # This rolls back to the previous production deployment for your project
+          vercel rollback --token="$VERCEL_TOKEN" --scope="$VERCEL_TEAM" --project="$VERCEL_PROJECT" --yes || true
+        '''
+      }
+    }
     success {
       echo 'Blue-Green deployment completed successfully'
     }
