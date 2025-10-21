@@ -1,7 +1,7 @@
 pipeline{
     agent any
     environment {
-        NODE_TOKEN = credentials('NODE_TOKEN')
+        VERCEL_TOKEN = credentials('VERCEL_TOKEN')
     }
     tools {
         nodejs "NodeJS"   // Use the NodeJS version configured in Jenkins
@@ -60,7 +60,7 @@ pipeline{
         stage('Deploy to Vercel') {
             steps {
                 dir('dist') {
-                    sh 'vercel --prod --token=$NODE_TOKEN --confirm --name=webapp'
+                    sh 'vercel --prod --token=$VERCEL_TOKEN --confirm --name=webapp'
                 }
             }
         }
