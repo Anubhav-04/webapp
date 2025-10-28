@@ -19,6 +19,12 @@ pipeline {
     }
 
   stages {
+    stages {
+        stage('Pre-clean') {
+            steps {
+                cleanWs()
+            }
+        }
     stage('Checkout') {
       steps {
         checkout scm
@@ -55,7 +61,9 @@ pipeline {
       steps {
         sshagent(credentials: ['dev-ssh-key-id']) {
         sh '''
-          scp -P 2260 -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/usr/share/nginx/html/
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$GREEN_ENV && sudo chown dev:dev /home/dev/$GREEN_ENV"
+          scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$GREEN_ENV
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && nginx -t && nginx -s reload'"
         '''
       }
       }
