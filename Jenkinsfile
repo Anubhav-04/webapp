@@ -19,11 +19,10 @@ pipeline {
     }
 
   stages {
-    stages {
-        stage('Pre-clean') {
-            steps {
-                cleanWs()
-            }
+    stage('Pre-clean') {
+        steps {
+            cleanWs()
+        }
         }
     stage('Checkout') {
       steps {
