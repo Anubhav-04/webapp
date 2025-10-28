@@ -60,12 +60,17 @@ pipeline {
       steps {
         sshagent(credentials: ['dev-ssh-key-id']) {
         sh '''
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$GREEN_ENV && sudo chown dev:dev /home/dev/$GREEN_ENV"
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$GREEN_ENV && sudo chown dev:dev /home/dev/$GREEN_ENV && "
           scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$GREEN_ENV
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && nginx -t && nginx -s reload'"
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/green; chmod -R a+rX /home/dev/green && nginx -t && nginx -s reload"
         '''
       }
       }
+    stage('Curl to green environment') {
+      steps {
+        sh 'curl http://127.0.0.1:5000/$GREEN_ENV'
+      }
+    }
     }
   }
 }
