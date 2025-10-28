@@ -62,7 +62,7 @@ pipeline {
         sh '''
           ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$GREEN_ENV && sudo chown dev:dev /home/dev/$GREEN_ENV"
           scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$GREEN_ENV
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/green; chmod -R a+rX /home/dev/green"
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/$GREEN_ENV; chmod -R a+rX /home/dev/$GREEN_ENV"
         '''
       }
       }
@@ -70,6 +70,22 @@ pipeline {
     stage('Curl to green environment') {
       steps {
         sh 'curl http://192.168.29.47:5000/$GREEN_ENV'
+      }
+    }
+    stage('Deploy to Blue environment') {
+      steps {
+        sshagent(credentials: ['dev-ssh-key-id']) {
+        sh '''
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$BLUE_ENV && sudo chown dev:dev /home/dev/$BLUE_ENV"
+          scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$BLUE_ENV
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/$BLUE_ENV; chmod -R a+rX /home/dev/$BLUE_ENV"
+        '''
+      }
+      }
+    }
+    stage('Curl to blue environment') {
+      steps {
+        sh 'curl http://192.168.29.47:5000/$BLUE_ENV'
       }
     }
   }
