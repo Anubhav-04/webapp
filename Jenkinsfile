@@ -1,68 +1,64 @@
-pipeline{
-    agent any
-    environment {
-        VERCEL_TOKEN = credentials('VERCEL_TOKEN')
-    }
-    tools {
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    ansiColor('xterm')
+  }
+
+  environment {
+    APP_NAME   = 'my-react-app'
+    BLUE_ENV   = 'blue'
+    GREEN_ENV  = 'green'
+    ACTIVE     = 'blue'
+    DEPLOY_HOST = 'host.docker.internal'
+    id_ed25519 = credentials('id_ed25519')
+  }
+  tools {
         nodejs "NodeJS"   // Use the NodeJS version configured in Jenkins
     }
-    options {
-        skipDefaultCheckout(true)
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
-    stages {
-        stage('Pre-clean') {
-            steps {
-                // Clean workspace before code checkout
-                cleanWs()
-            }
-        }
-        stage('Checkout') {
-            steps {
-                // Check out your code from SCM
-                checkout scm
-            }
-        }
-        stage('Approval') {
-            steps {
-                timeout(1) {
-                    script {
-                        input message: 'Approve to proceed?', ok: 'Approve'
-                    }
-                }
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-        }
-        }
-        stage('Test') {
-            steps {
-                sh '''
-                    npm run test
-                '''
-            }   
-        }
-        stage('Build') {
-            steps {
-                sh '''
-                    npm run build
-                    ls -la
-                '''
-            }   
-        }
-        stage('Install Vercel CLI') {
-            steps {
-                // Install Vercel CLI if it's not already available
-                sh 'npm install -g vercel'
-            }
-        }
-        stage('Deploy to Vercel') {
-            steps {
-                dir('dist') {
-                    sh 'vercel --prod --token=$VERCEL_TOKEN --confirm --name=webapp'
-                }
-            }
-        }
+
+    stage('Install Dependencies') {
+      steps {
+        // Use npm ci for clean, reproducible installs
+        sh 'npm install'
+      }
     }
+
+    stage('Test') {
+      steps {
+        // Vitest in jsdom environment
+        sh 'npm test'
+      }
+      post {
+        always {
+          // If you output junit from Vitest, publish here; otherwise keep as-is
+          echo 'Tests completed'
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'npm run build'
+      }
+    }
+
+    stage('Deploy to GREEN environment') {
+      steps {
+        sshagent(credentials: ['dev-ssh-key-id']) {
+        sh '''
+          scp -P 2260 -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/usr/share/nginx/html/
+        '''
+      }
+      }
+    }
+  }
 }
