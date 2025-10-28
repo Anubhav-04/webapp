@@ -15,7 +15,7 @@ pipeline {
     id_ed25519 = credentials('id_ed25519')
   }
   tools {
-        nodejs "NodeJS"   // Use the NodeJS version configured in Jenkins
+        nodejs "NodeJS" 
     }
 
   stages {
@@ -32,19 +32,16 @@ pipeline {
 
     stage('Install Dependencies') {
       steps {
-        // Use npm ci for clean, reproducible installs
         sh 'npm install'
       }
     }
 
     stage('Test') {
       steps {
-        // Vitest in jsdom environment
         sh 'npm test'
       }
       post {
         always {
-          // If you output junit from Vitest, publish here; otherwise keep as-is
           echo 'Tests completed'
         }
       }
@@ -72,6 +69,28 @@ pipeline {
         sh 'curl http://192.168.29.47:5000/$GREEN_ENV'
       }
     }
+
+        stage('Email for Approval to deploy to production environment') {
+            steps {
+                mail to: 'a.k.gupta159753@gmail.com',
+                subject: "Approval Needed for Production Deployment",
+                body: """
+                Build #${env.BUILD_NUMBER} is readdy for approval
+                
+                click the following link to approve:
+                ${env.BUILD_URL}
+                
+                Login and click "Proceed" in the Approval Stage
+                """
+            }
+        }
+        stage('Approval') {
+                steps {
+                    timeout(time:15, unit:'MINUTES'){
+                        input message: "Do you want to approve the deployment to production environment?", ok:'Approve'
+                }
+        }
+        }
     stage('Deploy to Blue environment') {
       steps {
         sshagent(credentials: ['dev-ssh-key-id']) {
