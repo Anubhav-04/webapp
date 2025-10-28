@@ -57,7 +57,7 @@ pipeline {
       steps {
         sshagent(credentials: ['dev-ssh-key-id']) {
         sh '''
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$GREEN_ENV && sudo chown dev:dev /home/dev/$GREEN_ENV"
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo rm -r $GREEN_ENV && sudo mkdir -p /home/dev/$GREEN_ENV && sudo chown dev:dev /home/dev/$GREEN_ENV"
           scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$GREEN_ENV
           ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/$GREEN_ENV; chmod -R a+rX /home/dev/$GREEN_ENV"
         '''
@@ -95,7 +95,7 @@ pipeline {
       steps {
         sshagent(credentials: ['dev-ssh-key-id']) {
         sh '''
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo mkdir -p /home/dev/$BLUE_ENV && sudo chown dev:dev /home/dev/$BLUE_ENV"
+          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo rm -r $BLUE_ENV && sudo mkdir -p /home/dev/$BLUE_ENV && sudo chown dev:dev /home/dev/$BLUE_ENV"
           scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$BLUE_ENV
           ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/$BLUE_ENV; chmod -R a+rX /home/dev/$BLUE_ENV"
         '''
