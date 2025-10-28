@@ -95,16 +95,16 @@ pipeline {
       steps {
         sshagent(credentials: ['dev-ssh-key-id']) {
         sh '''
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo rm -r $BLUE_ENV && sudo mkdir -p /home/dev/$BLUE_ENV && sudo chown dev:dev /home/dev/$BLUE_ENV"
-          scp -P 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$BLUE_ENV
-          ssh -p 2260 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/$BLUE_ENV; chmod -R a+rX /home/dev/$BLUE_ENV && cp -r /home/dev/$BLUE_ENV/* /usr/share/nginx/html"
+          ssh -p 2279 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo rm -r $BLUE_ENV && sudo mkdir -p /home/dev/$BLUE_ENV && sudo chown dev:dev /home/dev/$BLUE_ENV"
+          scp -P 2279 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 -r dist/* dev@$DEPLOY_HOST:/home/dev/$BLUE_ENV
+          ssh -p 2279 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -i $id_ed25519 dev@$DEPLOY_HOST "sudo su && chown -R dev:dev /home/dev/$BLUE_ENV; chmod -R a+rX /home/dev/$BLUE_ENV && cp -r /home/dev/$BLUE_ENV/* /usr/share/nginx/html"
         '''
       }
       }
     }
     stage('Curl to blue environment') {
       steps {
-        sh 'curl http://192.168.29.47:5000/$BLUE_ENV/'
+        sh 'curl http://192.168.29.47:6000/'
       }
     }
   }
