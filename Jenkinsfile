@@ -69,7 +69,7 @@ pipeline {
     }
     stage('Curl to green environment') {
       steps {
-        sh 'curl http://0.0.0.0:5000/$GREEN_ENV'
+        sh 'curl http://192.168.29.47:5000/$GREEN_ENV'
       }
     }
   }
